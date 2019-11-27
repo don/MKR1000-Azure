@@ -16,12 +16,13 @@ RTCZero rtc;
 DHT dht(DHTPIN, DHTTYPE);
 
 // Generate SAS key using https://github.com/sandrinodimattia/RedDog/releases
+// For IoT Hub use Device Explorer from Azure SDK git repo
 char hostname[] = "connectthedotsex-ns.servicebus.windows.net";
 char authSAS[] = "SharedAccessSignature sr=https%3a%2f%2fconnectthedotsex-ns.servicebus.windows.net%2fehdevices%2fpublishers%2fd1%2fmessages&sig=OzFhN9z3ROSBqmaEz1em3DHIPsj7vcu3gY4BE60n%2fTo%3d&se=1460172816&skn=D1";
 
 String hubName = "ehdevices";
 String deviceName = "D1";
-String uri = "/" + hubName + "/publishers/" + deviceName + "/messages";
+String uri = "/" + hubName + "/publishers/" + deviceName + "/messages/methods?api-version=2018-06-30" 
 
 int status = WL_IDLE_STATUS;
 WiFiSSLClient client;
@@ -55,11 +56,11 @@ void setup() {
 }
 
 void loop() {
-  float temperature = dht.readTemperature(true); // true == Fahrenheit
+  float temperature = dht.readTemperature(); // true == Fahrenheit, otherwise leave empty for °C
   float humidity = dht.readHumidity();
 
   Serial.print(temperature);
-  Serial.print(" *F ");
+  Serial.print(" °C ");
   Serial.print(humidity);
   Serial.println(" %");
 
@@ -102,8 +103,9 @@ String createJSON(String measurename, float value, String unitofmeasure) {
 
   // JSON is based on Microsoft Connect the Dots example
   // https://github.com/Azure/connectthedots/blob/master/Introduction.md#device-basics
-  StaticJsonBuffer<200> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
+  // Changes since JSON V5 JsonBuffer and JsonObject now StaticJsonDOcument
+   StaticJsonDocument<200> doc;
+  JsonObject root = doc.createNestedObject();
   root["subject"] = "wthr";
   root["organization"] = "Foo Industries";
   root["displayname"] = "MKR1000";
@@ -114,7 +116,7 @@ String createJSON(String measurename, float value, String unitofmeasure) {
   root["guid"] = "123456";
 
   char json[200];
-  root.printTo(json, sizeof(json));
+  root.printTo(doc, json, sizeof(json));
   return String(json);
 }
 
