@@ -22,7 +22,7 @@ char authSAS[] = "SharedAccessSignature sr=https%3a%2f%2fconnectthedotsex-ns.ser
 
 String hubName = "ehdevices";
 String deviceName = "D1";
-String uri = "/" + hubName + "/publishers/" + deviceName + "/messages/methods?api-version=2018-06-30" 
+String uri = "/" + hubName + "/publishers/" + deviceName + "/messages/methods?api-version=2018-06-30"; 
 
 int status = WL_IDLE_STATUS;
 WiFiSSLClient client;
@@ -104,19 +104,17 @@ String createJSON(String measurename, float value, String unitofmeasure) {
   // JSON is based on Microsoft Connect the Dots example
   // https://github.com/Azure/connectthedots/blob/master/Introduction.md#device-basics
   // Changes since JSON V5 JsonBuffer and JsonObject now StaticJsonDOcument
-   StaticJsonDocument<200> doc;
-  JsonObject root = doc.createNestedObject();
-  root["subject"] = "wthr";
-  root["organization"] = "Foo Industries";
-  root["displayname"] = "MKR1000";
-  root["measurename"] = measurename;
-  root["unitofmeasure"] = unitofmeasure;
-  root["value"] = String(value);
-  root["timecreated"] = dateString;
-  root["guid"] = "123456";
+   StaticJsonDocument<200> doc; //Static Json Document with size of 200 KB
+  doc["subject"] = "wthr"; //add variables to doc 
+  doc["displayname"] = "MKR1000";
+  doc["measurename"] = measurename;
+  doc["unitofmeasure"] = unitofmeasure;
+  doc["value"] = String(value);
+  doc["timecreated"] = dateString;
+  doc["guid"] = "123456";
 
   char json[200];
-  root.printTo(doc, json, sizeof(json));
+  serializeJson(doc, Serial);
   return String(json);
 }
 
